@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Video Generator</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 60px auto; padding: 20px; background: #0f0f0f; color: white; }
+        h1 { color: #a855f7; }
+        textarea { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; height: 100px; }
+        button { margin-top: 12px; width: 100%; padding: 14px; background: #a855f7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #9333ea; }
+        #status { margin-top: 20px; color: #aaa; }
+        video { margin-top: 20px; width: 100%; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🎬 AI Video Generator</h1>
+    <textarea id="prompt" placeholder="Describe your video... e.g. A sunset over Nairobi skyline, cinematic"></textarea>
+    <button onclick="generate()">Generate Video</button>
+    <div id="status"></div>
+    <video id="video" controls style="display:none"></video>
+<a id="download" style="display:none; margin-top:12px; display:none; width:100%; padding:12px; background:#22c55e; color:white; border-radius:8px; text-align:center; text-decoration:none; font-size:16px;" download="ai-video.mp4">⬇️ Download Video</a>
+
+    <script>
+        async function generate() {
+            const prompt = document.getElementById("prompt").value;
+            const status = document.getElementById("status");
+            const video = document.getElementById("video");
+
+            if (!prompt) return alert("Enter a prompt first!");
+
+            status.innerText = "⏳ Generating your video... (1-2 mins)";
+            video.style.display = "none";
+
+            const res = await fetch("/generate", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({prompt})
+            });
+
+            const data = await res.json();
+
+            if (data.url) {
+            status.innerText = "✅ Done!";
+            video.src = data.url;
+            video.style.display = "block";
+            const dl = document.getElementById("download");
+            dl.href = data.url;
+           dl.style.display = "block";
+     } else {
+                status.innerText = "❌ Error: " + data.error;
+            }
+        }
+    </script>
+</body>
+</html>
