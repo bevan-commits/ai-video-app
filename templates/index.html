@@ -3,52 +3,139 @@
 <head>
     <title>AI Video Generator</title>
     <style>
-        body { font-family: Arial; max-width: 600px; margin: 60px auto; padding: 20px; background: #0f0f0f; color: white; }
-        h1 { color: #a855f7; }
-        textarea { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #1a1a1a; color: white; font-size: 16px; height: 100px; }
-        button { margin-top: 12px; width: 100%; padding: 14px; background: #a855f7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial; max-width: 680px; margin: 60px auto; padding: 20px; background: #0f0f0f; color: white; }
+        h1 { color: #a855f7; margin-bottom: 6px; }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 24px; }
+
+        .info-cards { display: flex; gap: 12px; margin-bottom: 24px; }
+        .card { flex: 1; background: #1a1a1a; border-radius: 10px; padding: 14px; border-left: 3px solid #a855f7; }
+        .card h3 { font-size: 13px; color: #a855f7; margin-bottom: 6px; text-transform: uppercase; }
+        .card p { font-size: 13px; color: #ccc; line-height: 1.5; }
+
+        .tips { background: #1a1a1a; border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+        .tips h3 { font-size: 13px; color: #a855f7; text-transform: uppercase; margin-bottom: 10px; }
+        .tips ul { padding-left: 18px; }
+        .tips ul li { font-size: 13px; color: #ccc; margin-bottom: 6px; line-height: 1.5; }
+
+        label { font-size: 14px; color: #aaa; display: block; margin-bottom: 8px; }
+        textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; font-size: 15px; height: 110px; resize: vertical; }
+        textarea:focus { outline: none; border-color: #a855f7; }
+        button { margin-top: 12px; width: 100%; padding: 14px; background: #a855f7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button:hover { background: #9333ea; }
-        #status { margin-top: 20px; color: #aaa; }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        #status { margin-top: 16px; color: #aaa; font-size: 14px; text-align: center; }
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #aaa; border-top-color: #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         video { margin-top: 20px; width: 100%; border-radius: 10px; }
+        #download { display: none; margin-top: 12px; width: 100%; padding: 12px; background: #22c55e; color: white; border-radius: 8px; text-align: center; text-decoration: none; font-size: 15px; font-weight: bold; }
+        #download:hover { background: #16a34a; }
+
+        .example-prompts { margin-bottom: 10px; }
+        .example-prompts span { font-size: 12px; color: #888; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+        .chip { background: #2a2a2a; border: 1px solid #444; color: #ccc; font-size: 12px; padding: 5px 10px; border-radius: 20px; cursor: pointer; }
+        .chip:hover { border-color: #a855f7; color: #a855f7; }
     </style>
 </head>
 <body>
+
     <h1>🎬 AI Video Generator</h1>
-    <textarea id="prompt" placeholder="Describe your video... e.g. A sunset over Nairobi skyline, cinematic"></textarea>
-    <button onclick="generate()">Generate Video</button>
+    <p class="subtitle">Turn your text into a short AI-generated video in under 2 minutes.</p>
+
+    <!-- Info Cards -->
+    <div class="info-cards">
+        <div class="card">
+            <h3>⏱️ Video Length</h3>
+            <p>Each generated video is <strong>6 seconds</strong> long — perfect for TikTok, Reels, and Shorts clips.</p>
+        </div>
+        <div class="card">
+            <h3>⏳ Wait Time</h3>
+            <p>Generation takes <strong>1–2 minutes</strong>. Don't close the tab while your video is being created.</p>
+        </div>
+        <div class="card">
+            <h3>📥 Output</h3>
+            <p>You'll get an <strong>MP4 video</strong> you can watch and download directly from this page.</p>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="tips">
+        <h3>✏️ How to write a good prompt</h3>
+        <ul>
+            <li>Describe <strong>one scene</strong> — the model works best with a single continuous shot.</li>
+            <li>Include <strong>lighting & mood</strong>: golden hour, neon lights, foggy, sunny, dramatic.</li>
+            <li>Add <strong>camera style</strong>: cinematic, slow motion, aerial view, close-up.</li>
+            <li>Mention <strong>motion</strong>: waves crashing, car speeding, leaves blowing in wind.</li>
+        </ul>
+    </div>
+
+    <!-- Example Prompts -->
+    <div class="example-prompts">
+        <span>💡 Try an example:</span>
+        <div class="chips">
+            <div class="chip" onclick="setPrompt('A lion standing on a cliff at golden hour, wind blowing through its mane, cinematic slow motion')">🦁 Lion at sunset</div>
+            <div class="chip" onclick="setPrompt('A futuristic city at night with flying cars and neon lights, cinematic 4K')">🌆 Futuristic city</div>
+            <div class="chip" onclick="setPrompt('Ocean waves crashing on rocks at sunrise, aerial view, slow motion, cinematic')">🌊 Ocean waves</div>
+            <div class="chip" onclick="setPrompt('A cozy coffee shop on a rainy day, warm lighting, people walking outside, cinematic')">☕ Rainy coffee shop</div>
+        </div>
+    </div>
+
+    <!-- Input -->
+    <label for="prompt">Describe your video:</label>
+    <textarea id="prompt" placeholder="e.g. A sunset over Nairobi city skyline, golden hour, cinematic, slow motion"></textarea>
+    <button id="btn" onclick="generate()">✨ Generate Video</button>
+
     <div id="status"></div>
     <video id="video" controls style="display:none"></video>
-<a id="download" style="display:none; margin-top:12px; display:none; width:100%; padding:12px; background:#22c55e; color:white; border-radius:8px; text-align:center; text-decoration:none; font-size:16px;" download="ai-video.mp4">⬇️ Download Video</a>
+    <a id="download" download="ai-video.mp4">⬇️ Download Video</a>
 
     <script>
+        function setPrompt(text) {
+            document.getElementById("prompt").value = text;
+        }
+
         async function generate() {
             const prompt = document.getElementById("prompt").value;
             const status = document.getElementById("status");
             const video = document.getElementById("video");
+            const download = document.getElementById("download");
+            const btn = document.getElementById("btn");
 
-            if (!prompt) return alert("Enter a prompt first!");
+            if (!prompt) return alert("Please enter a prompt first!");
 
-            status.innerText = "⏳ Generating your video... (1-2 mins)";
+            btn.disabled = true;
+            btn.innerText = "Generating...";
+            status.innerHTML = '<span class="spinner"></span> Generating your video... this takes 1–2 minutes. Please wait.';
             video.style.display = "none";
+            download.style.display = "none";
 
-            const res = await fetch("/generate", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({prompt})
-            });
+            try {
+                const res = await fetch("/generate", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({prompt})
+                });
 
-            const data = await res.json();
+                const data = await res.json();
 
-            if (data.url) {
-            status.innerText = "✅ Done!";
-            video.src = data.url;
-            video.style.display = "block";
-            const dl = document.getElementById("download");
-            dl.href = data.url;
-           dl.style.display = "block";
-     } else {
-                status.innerText = "❌ Error: " + data.error;
+                if (data.url) {
+                    status.innerHTML = "✅ Done! Your video is ready.";
+                    video.src = data.url;
+                    video.style.display = "block";
+                    download.href = data.url;
+                    download.style.display = "block";
+                } else {
+                    status.innerHTML = "❌ Error: " + data.error;
+                }
+            } catch (err) {
+                status.innerHTML = "❌ Something went wrong. Please try again.";
             }
+
+            btn.disabled = false;
+            btn.innerText = "✨ Generate Video";
         }
     </script>
 </body>
