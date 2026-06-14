@@ -145,5 +145,82 @@
             btn.innerText = "✨ Generate Video";
         }
     </script>
+    <!-- My Videos & Merge Section -->
+<div style="margin-top:40px;">
+    <h2 style="color:#a855f7; margin-bottom:6px;">🎞️ My Videos</h2>
+    <p style="color:#888; font-size:13px; margin-bottom:16px;">Select 2 or more clips to merge into one continuous video.</p>
+
+    {% if videos %}
+    <div id="video-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        {% for v in videos %}
+        <div style="background:#1a1a1a; border-radius:10px; padding:12px; border:2px solid transparent;" 
+             id="card-{{ loop.index }}"
+             onclick="toggleSelect('{{ v.url }}', 'card-{{ loop.index }}')"
+             style="cursor:pointer;">
+            <video src="{{ v.url }}" style="width:100%; border-radius:6px;" muted playsinline
+                   onmouseover="this.play()" onmouseout="this.pause(); this.currentTime=0;"></video>
+            <p style="font-size:12px; color:#aaa; margin-top:8px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">{{ v.prompt }}</p>
+            <p style="font-size:11px; color:#555;">{{ v.created_at[:10] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button id="merge-btn" onclick="mergeVideos()" 
+            style="margin-top:16px; width:100%; padding:13px; background:#6366f1; color:white; border:none; border-radius:8px; font-size:15px; cursor:pointer; font-weight:bold; display:none;">
+        🎬 Merge Selected Videos
+    </button>
+    <div id="merge-status" style="margin-top:12px; color:#aaa; font-size:14px; text-align:center;"></div>
+
+    {% else %}
+    <p style="color:#555; font-size:14px;">No videos yet — generate your first one above!</p>
+    {% endif %}
+</div>
+
+<script>
+    const selected = new Set();
+
+    function toggleSelect(url, cardId) {
+        const card = document.getElementById(cardId);
+        if (selected.has(url)) {
+            selected.delete(url);
+            card.style.border = "2px solid transparent";
+        } else {
+            selected.add(url);
+            card.style.border = "2px solid #a855f7";
+        }
+        document.getElementById("merge-btn").style.display = selected.size >= 2 ? "block" : "none";
+    }
+
+    async function mergeVideos() {
+        const mergeStatus = document.getElementById("merge-status");
+        const btn = document.getElementById("merge-btn");
+
+        btn.disabled = true;
+        btn.innerText = "Merging...";
+        mergeStatus.innerText = "⏳ Merging your videos... please wait.";
+
+        const res = await fetch("/merge", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({urls: Array.from(selected)})
+        });
+
+        if (res.ok) {
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "merged-video.mp4";
+            a.click();
+            mergeStatus.innerText = "✅ Merged video downloaded!";
+        } else {
+            const data = await res.json();
+            mergeStatus.innerText = "❌ " + data.error;
+        }
+
+        btn.disabled = false;
+        btn.innerText = "🎬 Merge Selected Videos";
+    }
+</script>
 </body>
 </html>
