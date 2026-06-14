@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 100px auto; padding: 20px; background: #0f0f0f; color: white; }
+        h1 { color: #a855f7; margin-bottom: 6px; }
+        p { color: #888; font-size: 14px; margin-bottom: 24px; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; font-size: 15px; }
+        button { width: 100%; padding: 13px; background: #a855f7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #9333ea; }
+        .link { text-align: center; margin-top: 16px; font-size: 14px; color: #888; }
+        .link a { color: #a855f7; text-decoration: none; }
+        #msg { color: #f87171; font-size: 14px; margin-top: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>🎬 AI Video Generator</h1>
+    <p>Log in to your account</p>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Log In</button>
+    <div id="msg"></div>
+    <div class="link">Don't have an account? <a href="/signup">Sign up free</a></div>
+
+    <script>
+        async function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const msg = document.getElementById("msg");
+
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password})
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = "/";
+            } else {
+                msg.innerText = data.error;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 100px auto; padding: 20px; background: #0f0f0f; color: white; }
+        h1 { color: #a855f7; margin-bottom: 6px; }
+        p { color: #888; font-size: 14px; margin-bottom: 24px; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white; font-size: 15px; }
+        button { width: 100%; padding: 13px; background: #a855f7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #9333ea; }
+        .link { text-align: center; margin-top: 16px; font-size: 14px; color: #888; }
+        .link a { color: #a855f7; text-decoration: none; }
+        #msg { color: #f87171; font-size: 14px; margin-top: 10px; text-align: center; }
+        .free-badge { background: #1a1a1a; border: 1px solid #a855f7; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 13px; color: #ccc; text-align: center; }
+        .free-badge strong { color: #a855f7; }
+    </style>
+</head>
+<body>
+    <h1>🎬 AI Video Generator</h1>
+    <div class="free-badge">🎁 Sign up and get <strong>3 free videos</strong> — no credit card needed!</div>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password (min 6 chars)" />
+    <button onclick="signup()">Create Free Account</button>
+    <div id="msg"></div>
+    <div class="link">Already have an account? <a href="/login">Log in</a></div>
+
+    <script>
+        async function signup() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const msg = document.getElementById("msg");
+
+            if (password.length < 6) {
+                msg.innerText = "Password must be at least 6 characters.";
+                return;
+            }
+
+            const res = await fetch("/api/signup", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password})
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = "/";
+            } else {
+                msg.innerText = data.error;
+            }
+        }
+    </script>
+</body>
+</html>
